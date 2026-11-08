@@ -1,0 +1,386 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NetSwitch.App.ViewModels"
+        x:Class="NetSwitch.App.Views.PresetEditorWindow"
+        x:DataType="vm:PresetEditorViewModel"
+        Title="编辑预设"
+        Width="760"
+        Height="740"
+        MinWidth="700"
+        MinHeight="620"
+        ShowInTaskbar="False"
+        SystemDecorations="None"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent">
+  <Border Background="#FFFFFF"
+          BorderBrush="{DynamicResource BorderBrushSoft}"
+          BorderThickness="1"
+          CornerRadius="14"
+          BoxShadow="0 12 40 0 #26000000">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+      <!-- Header -->
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="22,18,14,0" PointerPressed="Header_OnPointerPressed">
+        <StackPanel Spacing="3">
+          <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding AdapterLine}" Classes="caption" FontSize="11" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="icon" Command="{Binding CancelCommand}" VerticalAlignment="Top">
+          <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+        </Button>
+      </Grid>
+
+      <TabControl Grid.Row="1" Grid.RowSpan="2" Margin="10,14,10,0">
+        <!-- General -->
+        <TabItem Header="常规">
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="12,12,12,18" Spacing="10">
+              <Border Classes="card" Padding="14">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="预设名称" FontSize="12" FontWeight="SemiBold" />
+                  <TextBox Text="{Binding Name, Mode=TwoWay}" Watermark="例如：软路由-静态" MaxLength="40" />
+                  <TextBlock Text="备注（可选）" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,0" />
+                  <TextBox Text="{Binding Notes, Mode=TwoWay}"
+                           Watermark="说明这套配置的用途，例如：软路由故障时临时切换"
+                           AcceptsReturn="True"
+                           TextWrapping="Wrap"
+                           Height="88"
+                           VerticalContentAlignment="Top" />
+                </StackPanel>
+              </Border>
+
+              <Border Background="{DynamicResource AccentSoftBrush}"
+                      BorderBrush="{DynamicResource AccentSoftBorderBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12,10">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Path Data="{StaticResource IconInfo}" Fill="{DynamicResource AccentBrush}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Top" Margin="0,1,0,0" />
+                  <TextBlock Grid.Column="1" Margin="8,0,0,0" FontSize="11.5" LineHeight="18" Classes="muted">
+                    预设是完整的目标状态：应用时，预设中声明的字段都会写成目标值；未声明的字段（例如 IPv6 选择“保持”）不会改动。
+                  </TextBlock>
+                </Grid>
+              </Border>
+            </StackPanel>
+          </ScrollViewer>
+        </TabItem>
+
+        <!-- IPv4 -->
+        <TabItem Header="IPv4">
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="12,12,12,18" Spacing="10">
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <!-- Left column -->
+                <StackPanel Grid.Column="0" Spacing="10">
+                  <Border Classes="card" Padding="14">
+                    <StackPanel Spacing="8">
+                      <TextBlock Text="IPv4 模式" FontSize="12.5" FontWeight="SemiBold" />
+                      <TextBlock Text="DHCP 自动获取，或完全指定静态地址。" Classes="caption" FontSize="11" />
+                      <StackPanel Orientation="Horizontal" Spacing="14" Margin="0,2,0,0">
+                        <RadioButton GroupName="ipv4mode" Content="DHCP" IsChecked="{Binding IsIpv4Dhcp, Mode=TwoWay}" />
+                        <RadioButton GroupName="ipv4mode" Content="静态" IsChecked="{Binding IsIpv4Static, Mode=TwoWay}" />
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+
+                  <Border Classes="card" Padding="14" IsVisible="{Binding IsIpv4Static}">
+                    <StackPanel Spacing="8">
+                      <TextBlock Text="IP 地址" FontSize="12.5" FontWeight="SemiBold" />
+                      <TextBlock Text="支持同时配置多个 IPv4 地址，作为高级能力。" Classes="caption" FontSize="11" />
+                      <ItemsControl ItemsSource="{Binding Addresses}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:AddressRowViewModel">
+                            <Grid ColumnDefinitions="*,Auto,60,Auto" Margin="0,2,0,2">
+                              <TextBox Text="{Binding Address, Mode=TwoWay}" Watermark="192.168.2.100" />
+                              <TextBlock Grid.Column="1" Text="/" Margin="6,0" VerticalAlignment="Center" Classes="muted" />
+                              <TextBox Grid.Column="2" Text="{Binding PrefixLength, Mode=TwoWay}" Watermark="24" />
+                              <Button Grid.Column="3" Classes="icon" Width="30" Height="30" Margin="4,0,0,0" Command="{Binding RemoveCommand}" ToolTip.Tip="删除此地址">
+                                <Path Data="{StaticResource IconTrash}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+                              </Button>
+                            </Grid>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                      <Button Classes="link" Command="{Binding AddAddressCommand}" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <Path Data="{StaticResource IconPlus}" Fill="{DynamicResource AccentBrush}" Width="11" Height="11" Stretch="Uniform" />
+                          <TextBlock Text="添加 IPv4 地址" FontSize="11.5" />
+                        </StackPanel>
+                      </Button>
+                    </StackPanel>
+                  </Border>
+
+                  <Border Classes="card" Padding="14" IsVisible="{Binding IsIpv4Static}">
+                    <StackPanel Spacing="8">
+                      <TextBlock Text="默认网关" FontSize="12.5" FontWeight="SemiBold" />
+                      <TextBlock Text="metric 越小优先级越高。" Classes="caption" FontSize="11" />
+                      <ItemsControl ItemsSource="{Binding Gateways}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:GatewayRowViewModel">
+                            <Grid ColumnDefinitions="*,74,Auto" Margin="0,2,0,2">
+                              <TextBox Text="{Binding Address, Mode=TwoWay}" Watermark="192.168.2.1" />
+                              <TextBox Grid.Column="1" Text="{Binding Metric, Mode=TwoWay}" Watermark="metric" Margin="6,0" />
+                              <Button Grid.Column="2" Classes="icon" Width="30" Height="30" Command="{Binding RemoveCommand}" ToolTip.Tip="删除此网关">
+                                <Path Data="{StaticResource IconTrash}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+                              </Button>
+                            </Grid>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                      <Button Classes="link" Command="{Binding AddGatewayCommand}" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <Path Data="{StaticResource IconPlus}" Fill="{DynamicResource AccentBrush}" Width="11" Height="11" Stretch="Uniform" />
+                          <TextBlock Text="添加网关" FontSize="11.5" />
+                        </StackPanel>
+                      </Button>
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+
+                <!-- Right column -->
+                <StackPanel Grid.Column="1" Spacing="10">
+                  <Border Classes="card" Padding="14">
+                    <StackPanel Spacing="9">
+                      <TextBlock Text="DNS 服务器" FontSize="12.5" FontWeight="SemiBold" />
+                      <TextBlock Text="自动跟随 DHCP；静态时按顺序使用。" Classes="caption" FontSize="11" />
+                      <StackPanel Orientation="Horizontal" Spacing="14">
+                        <RadioButton GroupName="dnsmode" Content="自动" IsChecked="{Binding IsDnsAuto, Mode=TwoWay}" />
+                        <RadioButton GroupName="dnsmode" Content="静态" IsChecked="{Binding IsDnsStatic, Mode=TwoWay}" />
+                      </StackPanel>
+                      <ItemsControl ItemsSource="{Binding DnsServers}" IsVisible="{Binding IsDnsStatic}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:DnsRowViewModel">
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,2">
+                              <TextBox Text="{Binding Address, Mode=TwoWay}" Watermark="223.5.5.5" />
+                              <Button Grid.Column="1" Classes="icon" Width="30" Height="30" Margin="4,0,0,0" Command="{Binding RemoveCommand}">
+                                <Path Data="{StaticResource IconTrash}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+                              </Button>
+                            </Grid>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                      <Button Classes="link" Command="{Binding AddDnsCommand}" HorizontalAlignment="Left" IsVisible="{Binding IsDnsStatic}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <Path Data="{StaticResource IconPlus}" Fill="{DynamicResource AccentBrush}" Width="11" Height="11" Stretch="Uniform" />
+                          <TextBlock Text="添加 DNS 服务器" FontSize="11.5" />
+                        </StackPanel>
+                      </Button>
+                    </StackPanel>
+                  </Border>
+
+                  <Border Classes="card" Padding="14">
+                    <StackPanel Spacing="9">
+                      <TextBlock Text="接口跃点" FontSize="12.5" FontWeight="SemiBold" />
+                      <TextBlock Text="影响多网卡时的路由优先级。" Classes="caption" FontSize="11" />
+                      <ComboBox ItemsSource="{Binding MetricModeOptions}" SelectedIndex="{Binding MetricModeIndex, Mode=TwoWay}" />
+                      <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsMetricManual}">
+                        <TextBox Text="{Binding InterfaceMetric, Mode=TwoWay}" Watermark="25" Width="120" />
+                        <TextBlock Text="1–9999" Classes="caption" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+              </Grid>
+
+              <Border Background="{DynamicResource AccentSoftBrush}"
+                      BorderBrush="{DynamicResource AccentSoftBorderBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12,10">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Path Data="{StaticResource IconInfo}" Fill="{DynamicResource AccentBrush}" Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Top" Margin="0,1,0,0" />
+                  <TextBlock Grid.Column="1" Margin="8,0,0,0" FontSize="11.5" LineHeight="18" Classes="muted">
+                    Windows 的网关和 DNS 是按适配器生效的，不区分来源 IP。一个预设里的多个 IPv4 地址共用同一组网关和 DNS。
+                  </TextBlock>
+                </Grid>
+              </Border>
+            </StackPanel>
+          </ScrollViewer>
+        </TabItem>
+
+        <!-- IPv6 -->
+        <TabItem Header="IPv6">
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="12,12,12,18" Spacing="10">
+              <Border Classes="card" Padding="14">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="IPv6 模式" FontSize="12.5" FontWeight="SemiBold" />
+                  <TextBlock Text="“禁用”会真正关闭该适配器上的 IPv6 绑定。" Classes="caption" FontSize="11" />
+                  <ComboBox ItemsSource="{Binding Ipv6ModeOptions}" SelectedIndex="{Binding Ipv6ModeIndex, Mode=TwoWay}" />
+                </StackPanel>
+              </Border>
+
+              <Border Background="{DynamicResource AmberSoftBrush}"
+                      BorderBrush="{DynamicResource AmberBorderBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12,10"
+                      IsVisible="{Binding IsIpv6Disabled}">
+                <TextBlock Text="禁用 IPv6 绑定可能会影响依赖 IPv6 的服务。应用后通常需要重新连接网络才能完全生效。"
+                           FontSize="11.5" LineHeight="18" Foreground="{DynamicResource AmberBrush}" />
+              </Border>
+
+              <StackPanel Spacing="10">
+                <Border Classes="card" Padding="14" IsVisible="{Binding IsIpv6Static}">
+                  <StackPanel Spacing="8">
+                    <TextBlock Text="IPv6 地址" FontSize="12.5" FontWeight="SemiBold" />
+                    <ItemsControl ItemsSource="{Binding Ipv6Addresses}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:AddressRowViewModel">
+                          <Grid ColumnDefinitions="*,Auto,60,Auto" Margin="0,2,0,2">
+                            <TextBox Text="{Binding Address, Mode=TwoWay}" Watermark="240e:3a1:2b3c:4d5e::100" />
+                            <TextBlock Grid.Column="1" Text="/" Margin="6,0" VerticalAlignment="Center" Classes="muted" />
+                            <TextBox Grid.Column="2" Text="{Binding PrefixLength, Mode=TwoWay}" Watermark="64" />
+                            <Button Grid.Column="3" Classes="icon" Width="30" Height="30" Margin="4,0,0,0" Command="{Binding RemoveCommand}">
+                              <Path Data="{StaticResource IconTrash}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+                            </Button>
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Classes="link" Command="{Binding AddIpv6AddressCommand}" HorizontalAlignment="Left">
+                      <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Path Data="{StaticResource IconPlus}" Fill="{DynamicResource AccentBrush}" Width="11" Height="11" Stretch="Uniform" />
+                        <TextBlock Text="添加 IPv6 地址" FontSize="11.5" />
+                      </StackPanel>
+                    </Button>
+
+                    <TextBlock Text="默认网关" FontSize="12" FontWeight="SemiBold" Margin="0,6,0,0" />
+                    <ItemsControl ItemsSource="{Binding Ipv6Gateways}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:GatewayRowViewModel">
+                          <Grid ColumnDefinitions="*,74,Auto" Margin="0,2,0,2">
+                            <TextBox Text="{Binding Address, Mode=TwoWay}" Watermark="fe80::1" />
+                            <TextBox Grid.Column="1" Text="{Binding Metric, Mode=TwoWay}" Watermark="metric" Margin="6,0" />
+                            <Button Grid.Column="2" Classes="icon" Width="30" Height="30" Command="{Binding RemoveCommand}">
+                              <Path Data="{StaticResource IconTrash}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+                            </Button>
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Classes="link" Command="{Binding AddIpv6GatewayCommand}" HorizontalAlignment="Left">
+                      <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Path Data="{StaticResource IconPlus}" Fill="{DynamicResource AccentBrush}" Width="11" Height="11" Stretch="Uniform" />
+                        <TextBlock Text="添加 IPv6 网关" FontSize="11.5" />
+                      </StackPanel>
+                    </Button>
+                  </StackPanel>
+                </Border>
+
+                <Border Classes="card" Padding="14" IsVisible="{Binding IsIpv6Managed}">
+                  <StackPanel Spacing="8">
+                    <TextBlock Text="IPv6 DNS" FontSize="12.5" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="14">
+                      <RadioButton GroupName="ipv6dns" Content="自动" IsChecked="{Binding IsIpv6DnsAuto, Mode=TwoWay}" />
+                      <RadioButton GroupName="ipv6dns" Content="静态" IsChecked="{Binding IsIpv6DnsStatic, Mode=TwoWay}" />
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding Ipv6DnsServers}" IsVisible="{Binding IsIpv6DnsStatic}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:DnsRowViewModel">
+                          <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,2">
+                            <TextBox Text="{Binding Address, Mode=TwoWay}" Watermark="2400:3200::1" />
+                            <Button Grid.Column="1" Classes="icon" Width="30" Height="30" Margin="4,0,0,0" Command="{Binding RemoveCommand}">
+                              <Path Data="{StaticResource IconTrash}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+                            </Button>
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Classes="link" Command="{Binding AddIpv6DnsCommand}" HorizontalAlignment="Left" IsVisible="{Binding IsIpv6DnsStatic}">
+                      <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Path Data="{StaticResource IconPlus}" Fill="{DynamicResource AccentBrush}" Width="11" Height="11" Stretch="Uniform" />
+                        <TextBlock Text="添加 IPv6 DNS" FontSize="11.5" />
+                      </StackPanel>
+                    </Button>
+
+                    <TextBlock Text="接口跃点" FontSize="12" FontWeight="SemiBold" Margin="0,6,0,0" />
+                    <ComboBox ItemsSource="{Binding MetricModeOptions}" SelectedIndex="{Binding Ipv6MetricModeIndex, Mode=TwoWay}" />
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsIpv6MetricManual}">
+                      <TextBox Text="{Binding Ipv6InterfaceMetric, Mode=TwoWay}" Watermark="25" Width="120" />
+                      <TextBlock Text="1–9999" Classes="caption" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </TabItem>
+
+        <!-- Wi-Fi -->
+        <TabItem Header="Wi-Fi">
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="12,12,12,18" Spacing="10">
+              <Border Classes="card" Padding="14">
+                <StackPanel Spacing="9">
+                  <TextBlock Text="Wi-Fi 动作" FontSize="12.5" FontWeight="SemiBold" />
+                  <TextBlock Text="只使用 Windows 中已经保存的 Profile；应用不会读取或保存 Wi-Fi 密码。" Classes="caption" FontSize="11" />
+                  <ComboBox ItemsSource="{Binding WirelessActionOptions}"
+                            SelectedIndex="{Binding WirelessActionIndex, Mode=TwoWay}"
+                            IsEnabled="{Binding IsWifiAdapter}" />
+
+                  <StackPanel Spacing="6" IsVisible="{Binding IsWirelessConnect}">
+                    <TextBlock Text="已保存的 Profile" FontSize="12" FontWeight="SemiBold" />
+                    <ComboBox ItemsSource="{Binding WifiProfiles}"
+                              SelectedItem="{Binding SelectedProfile, Mode=TwoWay}"
+                              PlaceholderText="选择已保存的 Wi-Fi" />
+                    <TextBlock Text="没有找到已保存的 Profile。请先在 Windows 设置中连接一次该 Wi-Fi。"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource AmberBrush}"
+                               IsVisible="{Binding !HasWifiProfiles}" />
+                  </StackPanel>
+                </StackPanel>
+              </Border>
+
+              <Border Background="{DynamicResource RedSoftBrush}"
+                      BorderBrush="{DynamicResource RedBorderBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12,10"
+                      IsVisible="{Binding IsWirelessDisconnect}">
+                <TextBlock Text="断开 Wi-Fi 会立即中断当前无线连接；如果这是唯一联网的适配器，操作后本应用可能无法联网。"
+                           FontSize="11.5" LineHeight="18" Foreground="{DynamicResource RedBrush}" />
+              </Border>
+
+              <Border Background="{DynamicResource AmberSoftBrush}"
+                      BorderBrush="{DynamicResource AmberBorderBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12,10"
+                      IsVisible="{Binding !IsWifiAdapter}">
+                <TextBlock Text="当前适配器不是 Wi-Fi 适配器，Wi-Fi 动作不会生效。"
+                           FontSize="11.5" LineHeight="18" Foreground="{DynamicResource AmberBrush}" />
+              </Border>
+            </StackPanel>
+          </ScrollViewer>
+        </TabItem>
+      </TabControl>
+
+      <!-- Footer -->
+      <Border Grid.Row="3" BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="0,1,0,0" Padding="22,13">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+            <Path Data="{StaticResource IconWarning}"
+                  Fill="{DynamicResource RedBrush}"
+                  Width="13" Height="13" Stretch="Uniform"
+                  IsVisible="{Binding HasValidationError}" />
+            <Path Data="{StaticResource IconCheck}"
+                  Fill="{DynamicResource GreenBrush}"
+                  Width="13" Height="13" Stretch="Uniform"
+                  IsVisible="{Binding !HasValidationError}" />
+            <TextBlock Text="{Binding ValidationMessage}"
+                       FontSize="11.5"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       TextTrimming="CharacterEllipsis"
+                       MaxWidth="390" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+            <Button Classes="secondary" Content="测试" Command="{Binding TestCommand}" />
+            <Button Classes="primary" Content="保存" Command="{Binding SaveCommand}" />
+            <Button Classes="secondary" Content="取消" Command="{Binding CancelCommand}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</Window>

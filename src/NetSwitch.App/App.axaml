@@ -1,0 +1,49 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="using:NetSwitch.App.Converters"
+             x:Class="NetSwitch.App.App"
+             RequestedThemeVariant="Light">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://NetSwitch/Assets/Icons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <SolidColorBrush x:Key="WindowBgBrush" Color="#F4F5F7" />
+      <SolidColorBrush x:Key="CardBgBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SidebarBgBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="BorderBrushSoft" Color="#E8EAEE" />
+      <SolidColorBrush x:Key="BorderBrushStrong" Color="#D6DAE1" />
+      <SolidColorBrush x:Key="TextPrimaryBrush" Color="#111827" />
+      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B7280" />
+      <SolidColorBrush x:Key="TextTertiaryBrush" Color="#9CA3AF" />
+      <SolidColorBrush x:Key="AccentBrush" Color="#2563EB" />
+      <SolidColorBrush x:Key="AccentHoverBrush" Color="#1D4ED8" />
+      <SolidColorBrush x:Key="AccentSoftBrush" Color="#EFF6FF" />
+      <SolidColorBrush x:Key="AccentSoftBorderBrush" Color="#BFDBFE" />
+      <SolidColorBrush x:Key="GreenBrush" Color="#059669" />
+      <SolidColorBrush x:Key="GreenSoftBrush" Color="#ECFDF5" />
+      <SolidColorBrush x:Key="AmberBrush" Color="#D97706" />
+      <SolidColorBrush x:Key="AmberSoftBrush" Color="#FFFBEB" />
+      <SolidColorBrush x:Key="AmberBorderBrush" Color="#FDE68A" />
+      <SolidColorBrush x:Key="RedBrush" Color="#DC2626" />
+      <SolidColorBrush x:Key="RedSoftBrush" Color="#FEF2F2" />
+      <SolidColorBrush x:Key="RedBorderBrush" Color="#FECACA" />
+      <SolidColorBrush x:Key="HoverBrush" Color="#F3F4F6" />
+
+      <conv:TestStatusToGeometryConverter x:Key="TestStatusToGeometry" />
+      <conv:TestStatusToBrushConverter x:Key="TestStatusToBrush" />
+      <conv:ToneToBrushConverter x:Key="ToneToBrush" />
+      <conv:ToneToGeometryConverter x:Key="ToneToGeometry" />
+      <conv:BoolToBrushConverter x:Key="UpToBrush" />
+      <conv:BoolToBrushConverter x:Key="StepActiveBrush" TrueBrush="#2563EB" FalseBrush="#E5E7EB" />
+      <conv:BoolToBrushConverter x:Key="StepDoneBrush" TrueBrush="#10B981" FalseBrush="#2563EB" />
+      <conv:BoolToBrushConverter x:Key="WhiteWhenTrue" TrueBrush="#FFFFFF" FalseBrush="#6B7280" />
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+    <StyleInclude Source="avares://NetSwitch/Styles/AppStyles.axaml" />
+  </Application.Styles>
+</Application>

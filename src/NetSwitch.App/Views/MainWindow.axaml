@@ -1,0 +1,384 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NetSwitch.App.ViewModels"
+        x:Class="NetSwitch.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="NetSwitch · 网络配置切换器"
+        Width="1180"
+        Height="780"
+        MinWidth="1000"
+        MinHeight="660"
+        WindowStartupLocation="CenterScreen"
+        SystemDecorations="None"
+        Icon="avares://NetSwitch/Assets/netswitch.png">
+
+  <Grid RowDefinitions="44,*,32">
+    <!-- ===== Title bar ===== -->
+    <Border Grid.Row="0"
+            Background="#FFFFFF"
+            BorderBrush="{DynamicResource BorderBrushSoft}"
+            BorderThickness="0,0,0,1"
+            PointerPressed="TitleBar_OnPointerPressed"
+            DoubleTapped="TitleBar_OnDoubleTapped">
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="14,0,0,0">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+          <Image Source="avares://NetSwitch/Assets/netswitch.png" Width="24" Height="24" />
+          <TextBlock Text="NetSwitch" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <Border Width="1" Height="16" Background="{DynamicResource BorderBrushSoft}" />
+          <TextBlock Text="网络配置切换器" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+          <Border Classes="pill green" IsVisible="{Binding IsElevated}" Margin="0,0,4,0">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <Path Data="{StaticResource IconShield}" Fill="{DynamicResource GreenBrush}" Width="12" Height="12" Stretch="Uniform" />
+              <TextBlock Classes="pill-text green" Text="管理员" />
+            </StackPanel>
+          </Border>
+          <Border Classes="pill red" IsVisible="{Binding !IsElevated}" Margin="0,0,4,0">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <Path Data="{StaticResource IconWarning}" Fill="{DynamicResource RedBrush}" Width="12" Height="12" Stretch="Uniform" />
+              <TextBlock Classes="pill-text red" Text="未提权" />
+            </StackPanel>
+          </Border>
+
+          <Button Classes="window-control"
+                  Command="{Binding OpenSettingsCommand}"
+                  ToolTip.Tip="设置">
+            <Path Data="{StaticResource IconSettings}" Fill="{DynamicResource TextSecondaryBrush}" Width="15" Height="15" Stretch="Uniform" />
+          </Button>
+          <Button Classes="window-control" Click="Minimize_OnClick" ToolTip.Tip="最小化">
+            <Path Data="{StaticResource IconMinimize}" Fill="{DynamicResource TextSecondaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+          </Button>
+          <Button Classes="window-control" Click="Maximize_OnClick" ToolTip.Tip="最大化/还原">
+            <Path Data="{StaticResource IconMaximize}" Fill="{DynamicResource TextSecondaryBrush}" Width="11" Height="11" Stretch="Uniform" />
+          </Button>
+          <Button Classes="window-control close" Click="Close_OnClick" ToolTip.Tip="关闭">
+            <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextSecondaryBrush}" Width="11" Height="11" Stretch="Uniform" />
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ===== Main content ===== -->
+    <Grid Grid.Row="1" ColumnDefinitions="250,*">
+      <!-- Adapter list -->
+      <Border Grid.Column="0"
+              Background="{DynamicResource SidebarBgBrush}"
+              BorderBrush="{DynamicResource BorderBrushSoft}"
+              BorderThickness="0,0,1,0">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,16,12,8">
+            <TextBlock Text="适配器" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="刷新适配器列表">
+              <Path Data="{StaticResource IconRefresh}" Fill="{DynamicResource TextSecondaryBrush}" Width="14" Height="14" Stretch="Uniform" />
+            </Button>
+          </Grid>
+
+          <ListBox Grid.Row="1"
+                   ItemsSource="{Binding Adapters}"
+                   SelectedItem="{Binding SelectedAdapter, Mode=TwoWay}"
+                   Margin="8,0"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:AdapterItemViewModel">
+                <Grid ColumnDefinitions="40,*" Margin="10,10">
+                  <Border Width="34" Height="34" CornerRadius="9" Background="#F1F5FB" VerticalAlignment="Top">
+                    <Panel>
+                      <Path Data="{StaticResource IconEthernet}"
+                            Fill="#4B5563"
+                            Width="17" Height="17"
+                            Stretch="Uniform"
+                            IsVisible="{Binding !IsWifi}" />
+                      <Path Data="{StaticResource IconWifi}"
+                            Fill="#4B5563"
+                            Width="17" Height="17"
+                            Stretch="Uniform"
+                            IsVisible="{Binding IsWifi}" />
+                    </Panel>
+                  </Border>
+                  <StackPanel Grid.Column="1" Spacing="2" Margin="10,0,0,0">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" />
+                      <Ellipse Width="6" Height="6" VerticalAlignment="Center"
+                               Fill="{Binding IsUp, Converter={StaticResource UpToBrush}}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding Description}"
+                               FontSize="11"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding AddressText}"
+                               Classes="mono"
+                               FontSize="11"
+                               Foreground="{DynamicResource TextTertiaryBrush}"
+                               TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <StackPanel Grid.Row="2" Margin="16,10,16,14" Spacing="4">
+            <TextBlock Text="适配器名称仅用于显示，内部使用 GUID 识别。"
+                       Classes="caption"
+                       LineHeight="17" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- Right content -->
+      <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="26,22,26,26" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto">
+          <!-- Adapter heading -->
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="7">
+              <TextBlock Text="{Binding SelectedTitle}" Classes="h1" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Ellipse Width="7" Height="7" VerticalAlignment="Center"
+                         Fill="{Binding SelectedIsUp, Converter={StaticResource UpToBrush}}" />
+                <TextBlock Text="{Binding SelectedStatusText}" FontSize="12" Foreground="{DynamicResource GreenBrush}" VerticalAlignment="Center" IsVisible="{Binding SelectedIsUp}" />
+                <TextBlock Text="{Binding SelectedStatusText}" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center" IsVisible="{Binding !SelectedIsUp}" />
+                <TextBlock Text="·" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" />
+                <TextBlock Text="{Binding SelectedSubtitle}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+              </StackPanel>
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Classes="ghost"
+                    Command="{Binding RefreshCommand}"
+                    VerticalAlignment="Top">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Path Data="{StaticResource IconRefresh}" Fill="{DynamicResource TextSecondaryBrush}" Width="13" Height="13" Stretch="Uniform" />
+                <TextBlock Text="刷新状态" FontSize="12" />
+              </StackPanel>
+            </Button>
+          </Grid>
+
+          <!-- Current state -->
+          <Border Grid.Row="1" Classes="card" Margin="0,18,0,0" Padding="16,12">
+            <Grid ColumnDefinitions="*,*,*,*">
+              <StackPanel Grid.Column="0" Spacing="3">
+                <TextBlock Text="IPv4 地址" Classes="label" />
+                <TextBlock Text="{Binding CurrentIpv4Text}" Classes="mono" FontSize="13" FontWeight="Medium" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Spacing="3">
+                <TextBlock Text="默认网关" Classes="label" />
+                <TextBlock Text="{Binding CurrentGatewayText}" Classes="mono" FontSize="13" />
+              </StackPanel>
+              <StackPanel Grid.Column="2" Spacing="3">
+                <TextBlock Text="DNS 服务器" Classes="label" />
+                <TextBlock Text="{Binding CurrentDnsText}" FontSize="13" TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+              <StackPanel Grid.Column="3" Spacing="3">
+                <TextBlock Text="IPv6 / 接口跃点" Classes="label" />
+                <TextBlock Text="{Binding CurrentIpv6Text}" FontSize="13" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding CurrentMetricText, StringFormat='跃点 {0}'}"
+                           Classes="caption"
+                           FontSize="11"
+                           TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+            </Grid>
+          </Border>
+
+
+          <!-- Recovery banner: an interrupted transaction or a one-click undo of the last apply -->
+          <Border Grid.Row="2"
+                  Background="{DynamicResource AmberSoftBrush}"
+                  BorderBrush="{DynamicResource AmberBorderBrush}"
+                  BorderThickness="1"
+                  CornerRadius="9"
+                  Padding="12,10"
+                  Margin="0,14,0,0"
+                  IsVisible="{Binding HasPendingRecovery}">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Path Data="{StaticResource IconWarning}"
+                    Fill="{DynamicResource AmberBrush}"
+                    Width="16" Height="16" Stretch="Uniform"
+                    VerticalAlignment="Top" Margin="0,1,0,0" />
+              <StackPanel Grid.Column="1" Margin="9,0,12,0" Spacing="2">
+                <TextBlock Text="存在未完成的网络事务" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource AmberBrush}" />
+                <TextBlock Text="{Binding PendingRecoveryText}" FontSize="11.5" LineHeight="18" Classes="muted" />
+              </StackPanel>
+              <Button Grid.Column="2" Classes="secondary" VerticalAlignment="Center"
+                      Command="{Binding RecoverPendingCommand}">
+                <TextBlock Text="恢复未完成事务" FontSize="12" />
+              </Button>
+            </Grid>
+          </Border>
+
+          <Border Grid.Row="2"
+                  Background="{DynamicResource AccentSoftBrush}"
+                  BorderBrush="{DynamicResource AccentSoftBorderBrush}"
+                  BorderThickness="1"
+                  CornerRadius="9"
+                  Padding="12,10"
+                  Margin="0,14,0,0"
+                  IsVisible="{Binding HasLastRecovery}">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Path Data="{StaticResource IconInfo}"
+                    Fill="{DynamicResource AccentBrush}"
+                    Width="15" Height="15" Stretch="Uniform"
+                    VerticalAlignment="Top" Margin="0,1,0,0" />
+              <StackPanel Grid.Column="1" Margin="9,0,12,0" Spacing="2">
+                <TextBlock Text="可以恢复上次应用前的配置" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource AccentBrush}" />
+                <TextBlock Text="{Binding LastRecoveryText}" FontSize="11.5" LineHeight="18" Classes="muted" />
+              </StackPanel>
+              <Button Grid.Column="2" Classes="secondary" VerticalAlignment="Center"
+                      Command="{Binding RestoreLastCommand}">
+                <TextBlock Text="恢复上次配置" FontSize="12" />
+              </Button>
+            </Grid>
+          </Border>
+
+          <!-- Preset header -->
+          <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,22,0,12">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+              <TextBlock Text="预设" Classes="h2" />
+              <Border Classes="pill" Padding="7,1">
+                <TextBlock Classes="pill-text" Text="{Binding PresetCountText}" />
+              </Border>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+              <Button Classes="secondary" Command="{Binding ImportConfigCommand}" ToolTip.Tip="导入预设（JSON）">
+                <Path Data="{StaticResource IconFolder}" Fill="{DynamicResource TextPrimaryBrush}" Width="13" Height="13" Stretch="Uniform" />
+              </Button>
+              <Button Classes="secondary" Command="{Binding ExportConfigCommand}" ToolTip.Tip="导出预设（JSON）">
+                <Path Data="{StaticResource IconArrowRight}" Fill="{DynamicResource TextPrimaryBrush}" Width="13" Height="13" Stretch="Uniform" />
+              </Button>
+              <Button Classes="secondary" Command="{Binding CreateFromCurrentCommand}"
+                      ToolTip.Tip="捕获当前 IPv4、IPv6、DNS、跃点与 Wi-Fi 连接，保存为预设">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <Path Data="{StaticResource IconPlus}" Fill="{DynamicResource TextPrimaryBrush}" Width="13" Height="13" Stretch="Uniform" />
+                  <TextBlock Text="从当前状态创建" />
+                </StackPanel>
+              </Button>
+              <Button Classes="primary" Command="{Binding NewPresetCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <Path Data="{StaticResource IconPlus}" Fill="White" Width="13" Height="13" Stretch="Uniform" />
+                  <TextBlock Text="新建预设" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Grid>
+
+          <!-- Preset cards -->
+          <ScrollViewer Grid.Row="4" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Presets}" IsVisible="{Binding HasPresets}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <UniformGrid Columns="2" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:PresetItemViewModel">
+                  <Border Classes="card" Classes.selected="{Binding IsCurrent}" Margin="0,0,12,12" Padding="16,14">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto">
+                      <!-- Name / badges / menu -->
+                      <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Border Grid.Column="1" Classes="pill accent" Margin="8,0,0,0" Padding="7,1">
+                          <TextBlock Classes="pill-text accent" Text="{Binding ModeText}" />
+                        </Border>
+                        <Border Grid.Column="2" Classes="pill green" Margin="6,0,0,0" Padding="7,1"
+                                HorizontalAlignment="Left" IsVisible="{Binding IsCurrent}">
+                          <TextBlock Classes="pill-text green" Text="当前" />
+                        </Border>
+                        <Button Grid.Column="3" Classes="icon" Width="26" Height="26" Command="{Binding CreateFromCommand}"
+                                ToolTip.Tip="以此预设新建（复制配置，不修改原预设）">
+                          <Path Data="{StaticResource IconRestore}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+                        </Button>
+                        <Button Grid.Column="4" Classes="icon" Width="26" Height="26" Command="{Binding EditCommand}" ToolTip.Tip="编辑预设">
+                          <Path Data="{StaticResource IconEdit}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+                        </Button>
+                        <Button Grid.Column="5" Classes="icon" Width="26" Height="26" Command="{Binding DeleteCommand}" ToolTip.Tip="删除预设">
+                          <Path Data="{StaticResource IconTrash}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+                        </Button>
+                      </Grid>
+
+                      <TextBlock Grid.Row="1" Text="{Binding SummaryText}" Classes="muted" FontSize="12" Margin="0,4,0,10" />
+
+                      <!-- Detail rows -->
+                      <Grid Grid.Row="2" ColumnDefinitions="54,*" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,10">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="网关" Classes="caption" Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding GatewayText}" FontSize="12" Margin="0,0,0,4" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="DNS" Classes="caption" Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DnsText}" FontSize="12" Margin="0,0,0,4" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="IPv6" Classes="caption" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Ipv6Text}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                      </Grid>
+
+                      <!-- Footer -->
+                      <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                        <TextBlock Text="{Binding LastAppliedText}"
+                                   Classes="caption"
+                                   FontSize="11"
+                                   VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                          <Button Classes="secondary" Padding="12,5" Command="{Binding TestCommand}">
+                            <TextBlock Text="测试" FontSize="12" />
+                          </Button>
+                          <Button Classes="primary" Padding="14,5" Command="{Binding ApplyCommand}">
+                            <TextBlock Text="应用" FontSize="12" />
+                          </Button>
+                        </StackPanel>
+                      </Grid>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+
+          <!-- Empty state -->
+          <Border Grid.Row="4" Classes="card" Padding="30" IsVisible="{Binding !HasPresets}" VerticalAlignment="Top">
+            <StackPanel Spacing="8" HorizontalAlignment="Center">
+              <Path Data="{StaticResource IconNetwork}" Fill="{DynamicResource TextTertiaryBrush}" Width="34" Height="34" Stretch="Uniform" HorizontalAlignment="Center" />
+              <TextBlock Text="这个适配器还没有预设" FontWeight="SemiBold" HorizontalAlignment="Center" />
+              <TextBlock Text="从当前网络状态创建第一个预设，之后就可以一键切换。"
+                         Classes="muted" FontSize="12" HorizontalAlignment="Center" />
+              <Button Classes="primary" Command="{Binding NewPresetCommand}" HorizontalAlignment="Center" Margin="0,6,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <Path Data="{StaticResource IconPlus}" Fill="White" Width="13" Height="13" Stretch="Uniform" />
+                  <TextBlock Text="新建预设" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </ScrollViewer>
+    </Grid>
+
+    <!-- ===== Status bar ===== -->
+    <Border Grid.Row="2"
+            Background="#FFFFFF"
+            BorderBrush="{DynamicResource BorderBrushSoft}"
+            BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="*,Auto" Margin="16,0">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Ellipse Width="6" Height="6" Fill="#10B981" />
+          <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+          <TextBlock Text="{Binding LastAppliedText}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+          <TextBlock Text="{Binding BackendText}" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Busy overlay -->
+    <Border Grid.RowSpan="3"
+            Background="#70FFFFFF"
+            IsVisible="{Binding IsBusy}"
+            IsHitTestVisible="True"
+            ZIndex="10">
+      <Border Classes="card" Padding="26,20" HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+        <StackPanel Spacing="12">
+          <ProgressBar IsIndeterminate="True" Height="3" />
+          <TextBlock Text="{Binding BusyText}" HorizontalAlignment="Center" FontSize="13" />
+        </StackPanel>
+      </Border>
+    </Border>
+  </Grid>
+</Window>

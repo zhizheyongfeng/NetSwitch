@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NetSwitch.App/NetSwitch.App.csproj" />
+    <Project Path="src/NetSwitch.Core/NetSwitch.Core.csproj" />
+    <Project Path="src/NetSwitch.Platform.Fake/NetSwitch.Platform.Fake.csproj" />
+    <Project Path="src/NetSwitch.Platform.Windows/NetSwitch.Platform.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NetSwitch.Core.Tests/NetSwitch.Core.Tests.csproj" />
+  </Folder>
+</Solution>

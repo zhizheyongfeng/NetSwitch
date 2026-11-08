@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetSwitch 界面预览</title>
+<style>
+  :root{
+    --accent:#0067c0;
+    --accent-hover:#0078d4;
+    --accent-soft:#e8f0fb;
+    --bg:#f3f3f3;
+    --surface:#ffffff;
+    --surface-2:#fbfbfb;
+    --surface-3:#f7f8fa;
+    --line:#e5e7ea;
+    --line-strong:#d6d9de;
+    --text:#1b1b1b;
+    --text-2:#5f6368;
+    --text-3:#8a8f95;
+    --green:#0f7b0f;
+    --green-bg:#dff6dd;
+    --amber:#8a5a00;
+    --amber-bg:#fff1c2;
+    --red:#c42b1c;
+    --red-bg:#fde7e9;
+    --shadow:0 30px 90px rgba(20,30,44,.28), 0 4px 18px rgba(20,30,44,.10);
+    --font:"Segoe UI Variable","Segoe UI","Microsoft YaHei UI","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;
+    --mono:"Cascadia Mono",Consolas,"SFMono-Regular","Noto Sans Mono CJK SC",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--font);
+    color:var(--text);
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #ffffff 0%, rgba(255,255,255,0) 55%),
+      linear-gradient(180deg,#eef1f5 0%,#e8ecf2 100%);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  button,input,select{font:inherit;color:inherit}
+  button{cursor:pointer}
+  svg{display:block}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#c7ccd3;border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+  ::-webkit-scrollbar-thumb:hover{background:#aeb5be;background-clip:padding-box}
+  ::-webkit-scrollbar-track{background:transparent}
+
+  /* ---------- 预览页头部 ---------- */
+  .preview-bar{
+    max-width:1320px;margin:0 auto;padding:18px 28px 10px;
+    display:flex;align-items:center;gap:26px;flex-wrap:wrap;
+  }
+  .preview-brand{display:flex;align-items:center;gap:11px;min-width:220px}
+  .preview-logo{
+    width:32px;height:32px;border-radius:9px;flex:none;
+    background:linear-gradient(145deg,#0078d4,#005a9e);
+    display:grid;place-items:center;color:#fff;
+    box-shadow:0 4px 12px rgba(0,103,192,.28);
+  }
+  .preview-brand h1{font-size:14px;font-weight:650;margin:0;letter-spacing:.01em}
+  .preview-brand p{font-size:11px;color:#6d7580;margin:2px 0 0}
+  .preview-tabs{
+    display:flex;gap:3px;background:#e1e6ec;padding:4px;border-radius:10px;
+    box-shadow:inset 0 1px 2px rgba(20,30,44,.06);
+  }
+  .preview-tab{
+    border:0;background:transparent;color:#5b6470;font-size:12px;
+    padding:8px 13px;border-radius:7px;white-space:nowrap;transition:all .14s ease;
+  }
+  .preview-tab:hover{color:#1b1b1b;background:rgba(255,255,255,.5)}
+  .preview-tab.is-active{background:#fff;color:#15181c;font-weight:600;box-shadow:0 1px 3px rgba(20,30,44,.14)}
+  .preview-hint{margin-left:auto;font-size:11px;color:#7b838d;display:flex;align-items:center;gap:6px}
+  .preview-hint .dot{width:6px;height:6px;border-radius:50%;background:#0f7b0f}
+
+  /* ---------- 应用窗口 ---------- */
+  .stage{display:flex;justify-content:center;padding:6px 24px 54px}
+  .app-window{
+    width:1180px;max-width:100%;height:740px;position:relative;overflow:hidden;
+    background:var(--bg);border-radius:12px;border:1px solid rgba(15,25,38,.10);
+    box-shadow:var(--shadow);display:flex;flex-direction:column;
+  }
+
+  /* 标题栏 */
+  .titlebar{
+    height:44px;flex:none;display:flex;align-items:stretch;justify-content:space-between;
+    background:#fbfbfb;border-bottom:1px solid #e9e9e9;user-select:none;
+  }
+  .brand{display:flex;align-items:center;gap:9px;padding-left:14px}
+  .brand-icon{width:20px;height:20px;border-radius:5px;background:linear-gradient(145deg,#0078d4,#005a9e);display:grid;place-items:center;color:#fff;flex:none}
+  .brand-name{font-size:12.5px;font-weight:600;letter-spacing:.01em}
+  .brand-sub{font-size:10px;color:#9aa0a6;padding-left:2px}
+  .titlebar-right{display:flex;align-items:center}
+  .admin-pill{
+    font-size:10px;color:#005a9e;background:#e8f0fb;border:1px solid #cfe0f4;
+    padding:2px 7px;border-radius:10px;margin-right:8px;white-space:nowrap;
+  }
+  .icon-btn{
+    width:30px;height:30px;border:0;border-radius:5px;background:transparent;
+    display:grid;place-items:center;color:#5f6368;flex:none;
+  }
+  .icon-btn:hover{background:#eceff3;color:#1b1b1b}
+  .win-controls{display:flex;height:44px;margin-left:5px}
+  .win-btn{width:46px;height:44px;border:0;background:transparent;display:grid;place-items:center;color:#444}
+  .win-btn:hover{background:#e9ebee}
+  .win-btn.close:hover{background:#c42b1c;color:#fff}
+
+  /* 主体 */
+  .app-body{flex:1;display:flex;min-height:0}
+
+  /* 左侧适配器 */
+  .sidebar{
+    width:238px;flex:none;background:var(--surface-3);border-right:1px solid #e9eaed;
+    padding:13px 10px;display:flex;flex-direction:column;min-height:0;
+  }
+  .sidebar-head{display:flex;align-items:center;justify-content:space-between;padding:0 6px 9px}
+  .sidebar-head span{font-size:11px;font-weight:600;color:#7a818a;letter-spacing:.06em}
+  .adapter-item{
+    position:relative;display:flex;gap:10px;padding:10px;border-radius:7px;
+    border:1px solid transparent;cursor:pointer;margin-bottom:3px;
+  }
+  .adapter-item:hover{background:#eceff3}
+  .adapter-item.is-active{background:#fff;border-color:#e2e5e9;box-shadow:0 1px 2px rgba(20,30,44,.05)}
+  .adapter-item.is-active::before{
+    content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--accent);
+  }
+  .adapter-item.is-offline{opacity:.56}
+  .adapter-icon{
+    width:31px;height:31px;border-radius:6px;background:var(--accent-soft);color:var(--accent);
+    display:grid;place-items:center;flex:none;margin-top:1px;
+  }
+  .adapter-icon.wifi{background:#eaf4ea;color:#2d7d2d}
+  .adapter-icon.off{background:#eceff3;color:#7b838d}
+  .adapter-text{min-width:0;flex:1}
+  .adapter-name{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;line-height:1.3}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none;box-shadow:0 0 0 2px rgba(15,123,15,.10)}
+  .status-dot.off{background:#a7adb5;box-shadow:0 0 0 2px rgba(120,128,138,.10)}
+  .adapter-sub{font-size:10.5px;color:#8a9098;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .adapter-ip{font-size:10.5px;color:#555c65;margin-top:3px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sidebar-foot{margin-top:auto;padding:10px 8px 2px;border-top:1px solid #eceef1}
+  .text-link{border:0;background:transparent;padding:0;color:#0067c0;font-size:11px}
+  .text-link:hover{text-decoration:underline}
+  .sidebar-note{font-size:10px;color:#9aa0a6;line-height:1.5;margin-top:6px}
+
+  /* 右侧内容 */
+  .content{flex:1;min-width:0;overflow-y:auto;padding:21px 26px 16px}
+  .content-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .content-head h1{font-size:22px;font-weight:650;margin:0;letter-spacing:-.01em}
+  .subline{display:flex;align-items:center;gap:7px;font-size:11.5px;color:#6d747d;margin-top:5px}
+  .subline .sep{color:#c3c7cc}
+  .content-head .head-actions{display:flex;gap:8px;padding-top:2px}
+
+  .btn{
+    height:32px;padding:0 14px;border-radius:5px;border:1px solid var(--line-strong);
+    background:#fff;color:#222;font-size:12px;font-weight:500;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    white-space:nowrap;transition:background .12s,border-color .12s,box-shadow .12s;
+  }
+  .btn:hover{background:#f7f8fa}
+  .btn:active{background:#eef0f3}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+  .btn.ghost{background:transparent;border-color:transparent;color:#3f454c}
+  .btn.ghost:hover{background:#e9ecf1}
+  .btn.small{height:28px;padding:0 11px;font-size:11.5px}
+  .btn.danger{background:#fff;border-color:#e2b6b1;color:#a32a1e}
+  .btn.danger:hover{background:#fdf3f2}
+
+  .current-state{
+    margin:16px 0 20px;background:#fff;border:1px solid #e7e9ec;border-radius:8px;
+    display:grid;grid-template-columns:repeat(4,1fr);padding:12px 17px;gap:10px;
+  }
+  .state-item{border-right:1px solid #f0f1f3;padding-right:10px}
+  .state-item:last-child{border-right:0;padding-right:0}
+  .state-item span{display:block;font-size:10px;color:#8a9098;letter-spacing:.04em}
+  .state-item strong{display:block;font-size:12px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .state-item em{font-style:normal;font-size:10.5px;color:#0f7b0f;margin-left:4px}
+
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:11px}
+  .section-head h2{font-size:15px;font-weight:650;margin:0;display:flex;align-items:center;gap:7px}
+  .count{font-size:10.5px;font-weight:600;color:#5f6368;background:#e7eaee;border-radius:9px;padding:1px 7px}
+  .section-head p{font-size:11px;color:#8a9098;margin:4px 0 0}
+  .section-actions{display:flex;gap:7px}
+
+  .preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .preset-card{
+    background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:13px 14px 11px;
+    display:flex;flex-direction:column;min-height:154px;position:relative;
+    transition:border-color .14s,box-shadow .14s;
+  }
+  .preset-card:hover{border-color:#d2d7dd;box-shadow:0 4px 14px rgba(20,30,44,.07)}
+  .preset-card.is-current{
+    order:-1;border-color:#9cc3e8;background:linear-gradient(180deg,#fbfdff 0%,#fff 70%);
+    box-shadow:inset 0 0 0 1px rgba(0,103,192,.08);
+  }
+  .preset-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .preset-title{display:flex;align-items:center;gap:7px;min-width:0}
+  .preset-title h3{font-size:13.5px;font-weight:650;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .badge{
+    font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:9px;white-space:nowrap;
+    background:#eceff3;color:#5f6368;border:1px solid transparent;
+  }
+  .badge.current{background:var(--green-bg);color:#0b6b0b;border-color:#c9e8c8}
+  .badge.last{background:#e8f0fb;color:#005a9e;border-color:#d2e3f6}
+  .badge.low{background:#f2f0fa;color:#5b4b9e;border-color:#e4ddf6}
+  .preset-desc{font-size:11px;color:#7b818a;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .preset-meta{display:grid;grid-template-columns:58px 1fr;row-gap:4px;margin:10px 0 11px;font-size:11px;line-height:1.35}
+  .preset-meta dt{color:#9298a0}
+  .preset-meta dd{margin:0;color:#3c4249;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .preset-foot{
+    margin-top:auto;padding-top:9px;border-top:1px solid #f0f1f3;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+  }
+  .last-applied{font-size:10px;color:#9aa0a6}
+  .preset-actions{display:flex;gap:6px}
+
+  /* 底部状态栏 */
+  .statusbar{
+    height:38px;flex:none;background:#fbfbfb;border-top:1px solid #e9eaed;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 16px;
+    font-size:10.5px;color:#6d747d;
+  }
+  .statusbar-left,.statusbar-right{display:flex;align-items:center;gap:7px;white-space:nowrap;overflow:hidden}
+  .statusbar strong{font-weight:600;color:#3c4249}
+  .statusbar .text-link{font-size:10.5px}
+
+  /* ---------- 遮罩与对话框 ---------- */
+  .overlay{
+    position:absolute;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
+    padding:18px;background:rgba(22,29,39,.36);backdrop-filter:blur(1.5px);
+  }
+  .app-window[data-screen="editor"] .overlay-editor,
+  .app-window[data-screen="static"] .overlay-static,
+  .app-window[data-screen="connectivity"] .overlay-connectivity,
+  .app-window[data-screen="apply"] .overlay-apply,
+  .app-window[data-screen="settings"] .overlay-settings{display:flex}
+
+  .dialog{
+    width:660px;max-width:100%;max-height:100%;display:flex;flex-direction:column;
+    background:#f7f7f7;border-radius:10px;overflow:hidden;
+    border:1px solid rgba(15,25,38,.14);box-shadow:0 28px 80px rgba(15,25,38,.45);
+    animation:dialogIn .16s ease-out both;
+  }
+  @keyframes dialogIn{from{opacity:.4;transform:translateY(6px) scale(.995)}to{opacity:1;transform:none}}
+  .dialog-head{
+    flex:none;background:#fff;border-bottom:1px solid #ececec;padding:15px 19px 12px;
+    display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  }
+  .dialog-title{font-size:15.5px;font-weight:650;letter-spacing:-.005em}
+  .dialog-sub{font-size:11px;color:#7b818a;margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .dialog-body{flex:1;min-height:0;overflow-y:auto;padding:15px 19px;background:#f7f7f7}
+  .dialog-foot{
+    flex:none;background:#fff;border-top:1px solid #ececec;padding:11px 19px;
+    display:flex;align-items:center;justify-content:flex-end;gap:8px;
+  }
+  .dialog-foot .spacer{margin-right:auto}
+  .mono{font-family:var(--mono)}
+  .tabular{font-variant-numeric:tabular-nums}
+
+  .stepper{display:flex;align-items:center;gap:8px;margin:0 0 11px}
+  .step{display:flex;align-items:center;gap:6px;font-size:10.5px;color:#8a9098;white-space:nowrap}
+  .step-num{
+    width:20px;height:20px;border-radius:50%;background:#e4e7eb;color:#7b818a;
+    display:grid;place-items:center;font-size:10px;font-weight:650;flex:none;
+  }
+  .step.is-active{color:#1f2328;font-weight:600}
+  .step.is-active .step-num{background:var(--accent);color:#fff}
+  .step.is-done .step-num{background:#0f7b0f;color:#fff}
+  .step.is-done{color:#4d555e}
+  .step-line{width:26px;height:1px;background:#d9dde2;flex:none}
+
+  .result-banner{display:flex;gap:11px;align-items:flex-start;padding:10px 13px;border-radius:7px;margin-bottom:11px}
+  .result-banner.warn{background:#fff8e1;border:1px solid #f0d890}
+  .result-banner.pass{background:#edf8ec;border:1px solid #b9e0b9}
+  .result-banner .banner-icon{
+    width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;margin-top:1px;
+  }
+  .result-banner.warn .banner-icon{background:#ffe9a3;color:#7a5000}
+  .result-banner.pass .banner-icon{background:#c9eac7;color:#0d6d0d}
+  .result-banner strong{display:block;font-size:12.5px;font-weight:650}
+  .result-banner p{margin:3px 0 0;font-size:11px;color:#5f6368;line-height:1.5}
+
+  .check-list{background:#fff;border:1px solid #e6e8eb;border-radius:8px;overflow:hidden}
+  .check-row{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border-bottom:1px solid #f1f2f4}
+  .check-row:last-child{border-bottom:0}
+  .check-row.is-warn{background:#fffdf4}
+  .check-icon{
+    width:18px;height:18px;border-radius:50%;flex:none;margin-top:1px;
+    display:grid;place-items:center;font-size:10px;font-weight:700;
+  }
+  .check-icon.pass{background:var(--green-bg);color:#0f7b0f}
+  .check-icon.warn{background:var(--amber-bg);color:#8a5a00}
+  .check-icon.skip{background:#eceff3;color:#7b818a}
+  .check-main{min-width:0;flex:1}
+  .check-name{font-size:11.8px;font-weight:600;line-height:1.35}
+  .check-detail{font-size:10.8px;color:#7b818a;margin-top:1px;line-height:1.4}
+  .check-value{margin-left:auto;padding-left:12px;font-size:10.5px;color:#8a9098;text-align:right;white-space:nowrap;line-height:1.5}
+  .check-value strong{color:#4d555e;font-weight:600}
+
+  .notice{
+    display:flex;gap:9px;padding:10px 12px;border-radius:7px;margin-top:12px;
+    background:#f1f6fc;border:1px solid #cfe0f4;color:#31506f;font-size:11px;line-height:1.55;
+  }
+  .notice.amber{background:#fff8e1;border-color:#f0d890;color:#6e4b00}
+  .notice.red{background:#fdf3f2;border-color:#e8c2bd;color:#8d2b20}
+  .notice .notice-icon{flex:none;margin-top:1px;color:#2f6ea6}
+  .notice.amber .notice-icon{color:#8a5a00}
+  .notice.red .notice-icon{color:#a32a1e}
+  .notice b{font-weight:650}
+
+  /* ---------- 编辑器 ---------- */
+  .dialog.editor{width:940px}
+  .editor-head{background:#fff;border-bottom:1px solid #ececec;padding:14px 19px 0}
+  .editor-head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .editor-tabs{display:flex;gap:2px;margin-top:11px}
+  .editor-tab{
+    border:0;background:transparent;padding:9px 12px 10px;font-size:12px;color:#666d76;
+    border-bottom:2px solid transparent;margin-bottom:-1px;
+  }
+  .editor-tab:hover{color:#1b1b1b}
+  .editor-tab.is-active{color:#005a9e;border-bottom-color:var(--accent);font-weight:600}
+  .editor-tab:disabled{color:#c0c4ca;cursor:default}
+  .editor-body{
+    flex:1;min-height:0;overflow-y:auto;background:#f7f7f7;padding:12px 18px;
+    display:grid;grid-template-columns:1fr 1fr;gap:9px 11px;align-content:start;
+  }
+  .form-card{background:#fff;border:1px solid #e6e8eb;border-radius:8px;padding:12px 15px;margin-bottom:11px}
+  .form-card:last-child{margin-bottom:0}
+  .editor-body .form-card{margin-bottom:0}
+  .editor-body .mode-card{grid-column:1;grid-row:1}
+  .editor-body .addr-card{grid-column:1;grid-row:2}
+  .editor-body .side-col{grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;gap:9px;margin:0}
+  .editor-body .side-col .form-card{margin-bottom:0}
+  .editor-body .dns-card{grid-column:1 / -1;grid-row:3}
+  .editor-body > .notice{grid-column:1 / -1;grid-row:4;margin-top:0}
+  .form-label{font-size:11.5px;font-weight:650;margin-bottom:3px}
+  .form-hint{font-size:10.5px;color:#8a9098;margin:0 0 8px;line-height:1.45}
+  .form-card .form-hint:last-child{margin-bottom:0}
+  .segmented{display:inline-flex;background:#eceff3;border-radius:6px;padding:3px;gap:2px;vertical-align:middle}
+  .segmented button{
+    border:0;background:transparent;color:#5f6368;font-size:11px;font-weight:500;
+    padding:5px 13px;border-radius:4px;
+  }
+  .segmented button.is-active{background:#fff;color:#15181c;font-weight:600;box-shadow:0 1px 2px rgba(20,30,44,.14)}
+  .form-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .form-row:first-of-type{margin-top:0}
+  .input{
+    height:32px;border:1px solid var(--line-strong);border-radius:5px;background:#fff;
+    padding:0 9px;font-size:11.5px;color:#222;outline:none;min-width:0;
+  }
+  .input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,103,192,.12)}
+  .input.mono{font-family:var(--mono);letter-spacing:.01em}
+  .input.grow{flex:1}
+  .input.ip{width:158px}
+  .input.mask{width:150px}
+  .input.metric{width:68px}
+  .input.dns{width:180px}
+  .input-sep{color:#a0a6ad;font-size:11px}
+  .row-remove{margin-left:auto}
+  .add-row{margin-top:6px}
+  .dns-fields{display:flex;gap:8px}
+  .dns-field{display:flex;align-items:center;gap:3px;flex:1;min-width:0}
+  .dns-field .input{flex:1;width:auto}
+  .field-sub{font-size:10.5px;color:#8a9098;margin-left:2px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+
+  /* ---------- 应用确认 ---------- */
+  .diff-wrap{background:#fff;border:1px solid #e6e8eb;border-radius:8px;overflow:hidden}
+  .diff-table{width:100%;border-collapse:collapse}
+  .diff-table th{
+    text-align:left;font-size:10px;color:#8a9098;font-weight:550;letter-spacing:.03em;
+    background:#fafbfc;padding:8px 12px;border-bottom:1px solid #eef0f2;
+  }
+  .diff-table td{font-size:11.3px;padding:8px 12px;border-bottom:1px solid #f2f3f5;vertical-align:top}
+  .diff-table tr:last-child td{border-bottom:0}
+  .diff-table td:first-child{color:#6d747d;width:96px}
+  .old{color:#8a9098;text-decoration:line-through;text-decoration-color:#c3c7cc}
+  .arrow{padding:0 7px;color:#aeb4bb}
+  .new{color:#0b5cad;font-weight:600}
+  .diff-meta{display:flex;align-items:center;gap:8px;margin-bottom:11px;font-size:11px;color:#7b818a}
+
+  /* ---------- 设置 ---------- */
+  .dialog.settings{width:880px}
+  .settings-body{flex:1;min-height:0;display:flex;background:#f7f7f7}
+  .settings-nav{width:186px;flex:none;background:#fbfbfb;border-right:1px solid #ececec;padding:11px 8px}
+  .nav-item{
+    display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:5px;
+    font-size:11.5px;color:#4d555e;cursor:pointer;margin-bottom:2px;
+  }
+  .nav-item:hover{background:#f0f2f5}
+  .nav-item.is-active{background:#e8f0fb;color:#005a9e;font-weight:600}
+  .nav-item svg{opacity:.8}
+  .settings-content{flex:1;min-width:0;overflow-y:auto;padding:17px 21px}
+  .settings-content h2{font-size:16px;font-weight:650;margin:0}
+  .settings-intro{font-size:11px;color:#7b818a;line-height:1.55;margin:5px 0 14px}
+  .settings-section{background:#fff;border:1px solid #e6e8eb;border-radius:8px;padding:13px 15px;margin-bottom:11px}
+  .settings-section h3{font-size:11.5px;font-weight:650;margin:0 0 8px}
+  .path-row{display:flex;align-items:center;gap:7px;margin-top:7px}
+  .path-label{width:88px;flex:none;font-size:10.8px;color:#5f6368}
+  .path-value{
+    flex:1;min-width:0;height:30px;display:flex;align-items:center;
+    background:#f5f6f8;border:1px solid #e3e5e8;border-radius:5px;padding:0 9px;
+    font-family:var(--mono);font-size:10.5px;color:#4d555e;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .path-value .derived{font-family:var(--font);font-size:9px;color:#9aa0a6;margin-left:auto;padding-left:8px}
+  .path-actions{display:flex;gap:4px}
+  .mini-btn{
+    height:30px;padding:0 9px;border:1px solid var(--line-strong);border-radius:5px;
+    background:#fff;font-size:10.5px;color:#3f454c;white-space:nowrap;
+  }
+  .mini-btn:hover{background:#f7f8fa}
+  .settings-foot{display:flex;align-items:center;gap:8px}
+  .path-status{display:flex;align-items:center;gap:5px;font-size:10.5px;color:#0f7b0f;margin-right:auto}
+  .settings-note{font-size:10.5px;color:#7b818a;line-height:1.55;margin-top:9px}
+
+  /* ---------- 页脚说明 ---------- */
+  .stage-caption{
+    max-width:1180px;margin:0 auto;padding:0 26px 42px;display:flex;
+    justify-content:space-between;gap:18px;font-size:11px;color:#7b838d;
+  }
+  .stage-caption span{display:flex;align-items:center;gap:6px}
+  .kbd{
+    display:inline-block;padding:1px 5px;border-radius:4px;border:1px solid #d3d8de;
+    background:#f7f8fa;font-size:10px;color:#5f6368;font-family:var(--font);
+  }
+
+  @media (max-width:1220px){
+    .preview-hint{display:none}
+  }
+  @media (max-width:1000px){
+    .preview-bar{padding:14px 18px 8px;gap:12px}
+    .preview-tabs{overflow-x:auto;max-width:100%}
+    .stage{padding:4px 12px 40px}
+    .app-window{height:720px}
+    .sidebar{width:205px}
+    .content{padding:18px}
+    .preset-grid{grid-template-columns:1fr}
+    .current-state{grid-template-columns:1fr 1fr;row-gap:12px}
+    .state-item:nth-child(2){border-right:0}
+  }
+</style>
+</head>
+<body>
+
+<header class="preview-bar">
+  <div class="preview-brand">
+    <div class="preview-logo">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+        <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        <path d="M10 6.5h4M6.5 10v4M17.5 10v4M10 17.5h4"/>
+      </svg>
+    </div>
+    <div>
+      <h1>NetSwitch · 界面预览</h1>
+      <p>Avalonia 11 · Windows 10/11 浅色主题</p>
+    </div>
+  </div>
+
+  <nav class="preview-tabs" aria-label="界面预览切换">
+    <button class="preview-tab is-active" data-screen="main">主窗口</button>
+    <button class="preview-tab" data-screen="editor">预设编辑器</button>
+    <button class="preview-tab" data-screen="static">测试 · 静态检查</button>
+    <button class="preview-tab" data-screen="connectivity">测试 · 连通性</button>
+    <button class="preview-tab" data-screen="apply">应用与回滚</button>
+    <button class="preview-tab" data-screen="settings">设置</button>
+  </nav>
+
+  <div class="preview-hint"><span class="dot"></span>可点击“测试 / 应用”体验流程</div>
+</header>
+
+<main class="stage">
+  <div class="app-window" id="app" data-screen="main">
+
+    <!-- 标题栏 -->
+    <div class="titlebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+        </div>
+        <span class="brand-name">网络配置切换器</span>
+        <span class="brand-sub">NetSwitch</span>
+      </div>
+      <div class="titlebar-right">
+        <span class="admin-pill">管理员</span>
+        <button class="icon-btn" title="设置" data-goto="settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.42.66.78.85.24.13.5.2.78.2H21a2 2 0 1 1 0 4h-.09c-.28 0-.54.07-.78.2-.36.19-.64.49-.78.85z"/>
+          </svg>
+        </button>
+        <div class="win-controls">
+          <button class="win-btn" title="最小化"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M0 5h10" stroke="currentColor" stroke-width="1"/></svg></button>
+          <button class="win-btn" title="最大化"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x=".5" y=".5" width="9" height="9" stroke="currentColor" stroke-width="1"/></svg></button>
+          <button class="win-btn close" title="关闭"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10" stroke="currentColor" stroke-width="1"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-body">
+      <!-- 适配器列表 -->
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <span>适配器</span>
+          <button class="icon-btn" title="刷新适配器" style="width:24px;height:24px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="adapter-item is-active">
+          <div class="adapter-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 17h.01M11 17h.01"/><path d="M12 14V9"/><path d="M8 6l4-3 4 3"/>
+            </svg>
+          </div>
+          <div class="adapter-text">
+            <div class="adapter-name">以太网 <span class="status-dot"></span></div>
+            <div class="adapter-sub">Intel I219-V · 1.0 Gbps</div>
+            <div class="adapter-ip">192.168.1.23/24</div>
+          </div>
+        </div>
+
+        <div class="adapter-item">
+          <div class="adapter-icon wifi">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2.5 8.5a15 15 0 0 1 19 0"/><path d="M5.5 12a10.5 10.5 0 0 1 13 0"/><path d="M8.5 15.5a6 6 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <div class="adapter-text">
+            <div class="adapter-name">WLAN <span class="status-dot"></span></div>
+            <div class="adapter-sub">Intel AX201 · 家庭网络-5G</div>
+            <div class="adapter-ip">192.168.1.88/24</div>
+          </div>
+        </div>
+
+        <div class="adapter-item is-offline">
+          <div class="adapter-icon off">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 17h.01M11 17h.01"/><path d="M12 14V9"/><path d="M8 6l4-3 4 3"/>
+            </svg>
+          </div>
+          <div class="adapter-text">
+            <div class="adapter-name">以太网 2 <span class="status-dot off"></span></div>
+            <div class="adapter-sub">Realtek USB GbE</div>
+            <div class="adapter-ip">网络电缆被拔出</div>
+          </div>
+        </div>
+
+        <div class="sidebar-foot">
+          <button class="text-link">显示虚拟网卡（3）</button>
+          <div class="sidebar-note">适配器名称仅用于显示，内部始终使用 GUID 识别。</div>
+        </div>
+      </aside>
+
+      <!-- 主内容 -->
+      <section class="content">
+        <div class="content-head">
+          <div>
+            <h1>以太网</h1>
+            <div class="subline">
+              <span class="status-dot"></span><span>已连接</span>
+              <span class="sep">·</span><span>1.0 Gbps</span>
+              <span class="sep">·</span><span>DHCP</span>
+              <span class="sep">·</span><span>195.2 MB 已接收</span>
+            </div>
+          </div>
+          <div class="head-actions">
+            <button class="btn ghost">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+              刷新状态
+            </button>
+          </div>
+        </div>
+
+        <div class="current-state">
+          <div class="state-item">
+            <span>IPv4 地址</span>
+            <strong>192.168.1.23/24</strong>
+          </div>
+          <div class="state-item">
+            <span>默认网关</span>
+            <strong>192.168.1.1</strong>
+          </div>
+          <div class="state-item">
+            <span>DNS 服务器</span>
+            <strong>自动 <em>192.168.1.1</em></strong>
+          </div>
+          <div class="state-item">
+            <span>IPv6</span>
+            <strong>自动 <em>240e:...</em></strong>
+          </div>
+        </div>
+
+        <div class="section-head">
+          <div>
+            <h2>预设 <span class="count">4</span></h2>
+            <p>选择一个预设，一键切换该适配器的完整网络参数</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn small">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              从当前状态创建
+            </button>
+            <button class="btn small primary" data-goto="editor">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              新建预设
+            </button>
+          </div>
+        </div>
+
+        <div class="preset-grid">
+          <!-- 当前预设 -->
+          <article class="preset-card">
+            <div class="preset-top">
+              <div class="preset-title">
+                <h3>软路由-静态</h3>
+                <span class="badge">常用</span>
+              </div>
+              <button class="icon-btn" title="更多操作" style="width:24px;height:24px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+              </button>
+            </div>
+            <div class="preset-desc">静态 IP · 主用 192.168.2.100/24</div>
+            <dl class="preset-meta">
+              <dt>网关</dt><dd>192.168.2.1 · 跃点 10</dd>
+              <dt>DNS</dt><dd>192.168.2.1, 223.5.5.5</dd>
+              <dt>IPv6</dt><dd>保持系统状态</dd>
+            </dl>
+            <div class="preset-foot">
+              <span class="last-applied">昨天 18:42 应用</span>
+              <div class="preset-actions">
+                <button class="btn small ghost" data-goto="static">测试</button>
+                <button class="btn small primary" data-goto="apply">应用</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 当前 -->
+          <article class="preset-card is-current">
+            <div class="preset-top">
+              <div class="preset-title">
+                <h3>主路由-DHCP</h3>
+                <span class="badge current">当前</span>
+              </div>
+              <button class="icon-btn" title="更多操作" style="width:24px;height:24px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+              </button>
+            </div>
+            <div class="preset-desc">DHCP · DNS 自动 · 自动跃点</div>
+            <dl class="preset-meta">
+              <dt>网关</dt><dd>由 DHCP 下发</dd>
+              <dt>DNS</dt><dd>由 DHCP 下发</dd>
+              <dt>IPv6</dt><dd>自动</dd>
+            </dl>
+            <div class="preset-foot">
+              <span class="last-applied">2 分钟前应用</span>
+              <div class="preset-actions">
+                <button class="btn small ghost" data-goto="static">测试</button>
+                <button class="btn small" data-goto="apply">应用</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 公司 -->
+          <article class="preset-card">
+            <div class="preset-top">
+              <div class="preset-title">
+                <h3>公司-固定IP</h3>
+              </div>
+              <button class="icon-btn" title="更多操作" style="width:24px;height:24px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+              </button>
+            </div>
+            <div class="preset-desc">静态 IP · 公司内网，禁用 IPv6</div>
+            <dl class="preset-meta">
+              <dt>地址</dt><dd>10.20.8.45/24</dd>
+              <dt>网关</dt><dd>10.20.8.1 · 跃点 5</dd>
+              <dt>DNS</dt><dd>10.20.8.10, 10.20.8.11</dd>
+            </dl>
+            <div class="preset-foot">
+              <span class="last-applied">7 天前应用</span>
+              <div class="preset-actions">
+                <button class="btn small ghost" data-goto="static">测试</button>
+                <button class="btn small" data-goto="apply">应用</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 调试 -->
+          <article class="preset-card">
+            <div class="preset-top">
+              <div class="preset-title">
+                <h3>调试-DNS</h3>
+                <span class="badge low">低风险</span>
+              </div>
+              <button class="icon-btn" title="更多操作" style="width:24px;height:24px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+              </button>
+            </div>
+            <div class="preset-desc">DHCP · 仅覆盖 DNS 服务器</div>
+            <dl class="preset-meta">
+              <dt>地址</dt><dd>保持 DHCP</dd>
+              <dt>DNS</dt><dd>223.5.5.5, 119.29.29.29</dd>
+              <dt>IPv6</dt><dd>保持系统状态</dd>
+            </dl>
+            <div class="preset-foot">
+              <span class="last-applied">未在当前环境中应用</span>
+              <div class="preset-actions">
+                <button class="btn small ghost" data-goto="static">测试</button>
+                <button class="btn small" data-goto="apply">应用</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <!-- 底部状态栏 -->
+    <div class="statusbar">
+      <div class="statusbar-left">
+        <span class="status-dot"></span>
+        <span>当前：<strong>DHCP</strong> · 192.168.1.23/24 · 网关 192.168.1.1 · DNS 自动</span>
+      </div>
+      <div class="statusbar-right">
+        <span>上次应用：<strong>主路由-DHCP</strong>（2 分钟前）</span>
+        <button class="text-link">恢复上次配置</button>
+      </div>
+    </div>
+
+    <!-- ================= 静态检查 ================= -->
+    <div class="overlay overlay-static">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="static-title">
+        <div class="dialog-head">
+          <div>
+            <div class="dialog-title" id="static-title">测试：软路由-静态</div>
+            <div class="dialog-sub">
+              <span>以太网</span><span>·</span><span>Intel I219-V</span><span>·</span><span>编辑中的配置</span>
+            </div>
+          </div>
+          <button class="icon-btn" data-goto="main" title="关闭">
+            <svg width="14" height="14" viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10" stroke="currentColor" stroke-width="1.2"/></svg>
+          </button>
+        </div>
+        <div class="dialog-body">
+          <div class="stepper">
+            <div class="step is-active"><span class="step-num">1</span>静态检查</div>
+            <span class="step-line"></span>
+            <div class="step"><span class="step-num">2</span>连通性测试</div>
+          </div>
+
+          <div class="result-banner warn">
+            <div class="banner-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+            </div>
+            <div>
+              <strong>静态检查有 2 项警告</strong>
+              <p>没有阻断性错误，可以继续做连通性测试。静态检查通过不代表应用后一定连通。</p>
+            </div>
+          </div>
+
+          <div class="check-list">
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">地址与子网掩码</div>
+                <div class="check-detail">192.168.2.100/24 · 格式合法，广播地址未占用</div>
+              </div>
+              <div class="check-value">通过</div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">适配器可用性</div>
+                <div class="check-detail">以太网 · 已连接 · 1.0 Gbps</div>
+              </div>
+              <div class="check-value">通过</div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">管理员权限</div>
+                <div class="check-detail">当前进程已提权，可以修改网络配置</div>
+              </div>
+              <div class="check-value">通过</div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">网关位于子网内</div>
+                <div class="check-detail">192.168.2.1 属于 192.168.2.0/24</div>
+              </div>
+              <div class="check-value">通过</div>
+            </div>
+            <div class="check-row is-warn">
+              <span class="check-icon warn">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 6v7M12 17h.01"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">目标 IP 冲突预检</div>
+                <div class="check-detail">同网段 ARP 探测无应答；对端可能未接入或阻止探测</div>
+              </div>
+              <div class="check-value">警告</div>
+            </div>
+            <div class="check-row is-warn">
+              <span class="check-icon warn">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 6v7M12 17h.01"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">唯一联网适配器</div>
+                <div class="check-detail">以太网是当前唯一联网的适配器，测试期间可能短暂断网</div>
+              </div>
+              <div class="check-value">警告</div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon skip">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">Wi-Fi Profile</div>
+                <div class="check-detail">该预设不包含 Wi-Fi 动作</div>
+              </div>
+              <div class="check-value">跳过</div>
+            </div>
+          </div>
+
+          <div class="notice amber">
+            <svg class="notice-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+            <div>
+              <b>是否继续做连通性测试？</b><br>
+              测试会临时应用这套配置，可能短暂断网或 DNS 中断 <b>10–30 秒</b>，结束后自动恢复原配置。只有点击“继续”才会修改网络。
+            </div>
+          </div>
+        </div>
+        <div class="dialog-foot">
+          <button class="btn" data-goto="main">仅查看静态结果</button>
+          <button class="btn primary" data-goto="connectivity">
+            继续连通性测试
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 连通性结果 ================= -->
+    <div class="overlay overlay-connectivity">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="conn-title">
+        <div class="dialog-head">
+          <div>
+            <div class="dialog-title" id="conn-title">连通性测试完成</div>
+            <div class="dialog-sub">
+              <span>软路由-静态</span><span>·</span><span>以太网</span><span>·</span><span>交易 #A7F3C2</span>
+            </div>
+          </div>
+          <button class="icon-btn" data-goto="main" title="关闭">
+            <svg width="14" height="14" viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10" stroke="currentColor" stroke-width="1.2"/></svg>
+          </button>
+        </div>
+        <div class="dialog-body">
+          <div class="stepper">
+            <div class="step is-done"><span class="step-num">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+            </span>静态检查</div>
+            <span class="step-line"></span>
+            <div class="step is-active"><span class="step-num">2</span>连通性测试</div>
+          </div>
+
+          <div class="result-banner pass">
+            <div class="banner-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+            </div>
+            <div>
+              <strong>通过 · 用时 4.2 秒</strong>
+              <p>6 项检查通过，1 项跳过。原网络配置已恢复。</p>
+            </div>
+          </div>
+
+          <div class="check-list">
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">链路与地址</div>
+                <div class="check-detail">链路 up · 192.168.2.100/24 已生效</div>
+              </div>
+              <div class="check-value"><strong>12 ms</strong></div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">网关可达</div>
+                <div class="check-detail">ICMP 192.168.2.1 · 4/4 应答</div>
+              </div>
+              <div class="check-value"><strong>1 ms</strong></div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">DNS 服务器直连</div>
+                <div class="check-detail">向 192.168.2.1 直接查询 UDP 53</div>
+              </div>
+              <div class="check-value"><strong>8 ms</strong></div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">域名解析</div>
+                <div class="check-detail">www.msftconnecttest.com → 23.35.148.112</div>
+              </div>
+              <div class="check-value"><strong>15 ms</strong></div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">公网 TCP</div>
+                <div class="check-detail">23.35.148.112:443 连接成功</div>
+              </div>
+              <div class="check-value"><strong>32 ms</strong></div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon skip">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">IPv6 状态</div>
+                <div class="check-detail">预设不管理 IPv6，未做修改</div>
+              </div>
+              <div class="check-value">跳过</div>
+            </div>
+            <div class="check-row">
+              <span class="check-icon pass">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              </span>
+              <div class="check-main">
+                <div class="check-name">恢复原配置</div>
+                <div class="check-detail">已恢复为 DHCP · 192.168.1.23/24 · 读回校验通过</div>
+              </div>
+              <div class="check-value"><strong>已恢复</strong></div>
+            </div>
+          </div>
+
+          <div class="notice">
+            <svg class="notice-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <div>测试不会改变当前活动预设，也不会写入正常撤销栈。测试快照已保存，日志交易类型为 <span class="mono">Test</span>。</div>
+          </div>
+        </div>
+        <div class="dialog-foot">
+          <span class="spacer"></span>
+          <button class="btn" data-goto="static">重新测试</button>
+          <button class="btn primary" data-goto="apply">应用此配置</button>
+          <button class="btn" data-goto="main">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 预设编辑器 ================= -->
+    <div class="overlay overlay-editor">
+      <div class="dialog editor" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+        <div class="editor-head">
+          <div class="editor-head-row">
+            <div>
+              <div class="dialog-title" id="editor-title">编辑预设 · 软路由-静态</div>
+              <div class="dialog-sub"><span>以太网</span><span>·</span><span>Intel I219-V</span><span>·</span><span>完整目标状态</span></div>
+            </div>
+            <button class="icon-btn" data-goto="main" title="关闭">
+              <svg width="14" height="14" viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10" stroke="currentColor" stroke-width="1.2"/></svg>
+            </button>
+          </div>
+          <div class="editor-tabs">
+            <button class="editor-tab">常规</button>
+            <button class="editor-tab is-active">IPv4</button>
+            <button class="editor-tab">IPv6</button>
+            <button class="editor-tab" disabled>Wi-Fi（仅 WLAN）</button>
+            <button class="editor-tab">预览</button>
+          </div>
+        </div>
+        <div class="editor-body">
+          <div class="form-card mode-card">
+            <div class="form-label">IPv4 模式</div>
+            <p class="form-hint">预设是完整目标状态；应用时会把下面声明的字段全部写成目标值。</p>
+            <div class="segmented">
+              <button>DHCP</button>
+              <button class="is-active">静态</button>
+            </div>
+          </div>
+
+          <div class="form-card addr-card">
+            <div class="form-label">IP 地址</div>
+            <p class="form-hint">支持同时配置多个 IPv4 地址，作为高级能力。默认只显示一个地址。</p>
+            <div class="form-row">
+              <input class="input mono ip" value="192.168.2.100" aria-label="IP 地址">
+              <span class="input-sep">/</span>
+              <select class="input mask" aria-label="子网掩码">
+                <option>24 · 255.255.255.0</option>
+                <option>16 · 255.255.0.0</option>
+                <option>25 · 255.255.255.128</option>
+              </select>
+              <button class="icon-btn row-remove" title="移除地址">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/></svg>
+              </button>
+            </div>
+            <div class="form-row add-row">
+              <button class="text-link">＋ 添加 IPv4 地址</button>
+            </div>
+          </div>
+
+          <div class="form-grid side-col">
+            <div class="form-card">
+              <div class="form-label">默认网关</div>
+              <p class="form-hint">metric 越小优先级越高。</p>
+              <div class="form-row">
+                <input class="input mono ip" value="192.168.2.1" aria-label="默认网关">
+                <input class="input metric mono" value="10" aria-label="网关 metric">
+                <span class="field-sub">metric</span>
+              </div>
+              <div class="form-row add-row">
+                <button class="text-link">＋ 添加网关</button>
+              </div>
+            </div>
+            <div class="form-card">
+              <div class="form-label">接口跃点</div>
+              <p class="form-hint">影响多网卡时的路由优先级。</p>
+              <div class="segmented">
+                <button>保持</button>
+                <button class="is-active">自动</button>
+                <button>固定</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card dns-card">
+            <div class="form-label">DNS 服务器</div>
+            <p class="form-hint">自动表示跟随 DHCP；静态时按顺序使用。</p>
+            <div class="segmented" style="margin-bottom:10px">
+              <button>自动</button>
+              <button class="is-active">静态</button>
+            </div>
+            <div class="form-row dns-fields">
+              <div class="dns-field">
+                <input class="input mono dns" value="192.168.2.1" aria-label="DNS 服务器 1">
+                <button class="icon-btn" title="移除 DNS">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/></svg>
+                </button>
+              </div>
+              <div class="dns-field">
+                <input class="input mono dns" value="223.5.5.5" aria-label="DNS 服务器 2">
+                <button class="icon-btn" title="移除 DNS">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="form-row add-row">
+              <button class="text-link">＋ 添加 DNS 服务器</button>
+            </div>
+          </div>
+
+          <div class="notice">
+            <svg class="notice-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <div>Windows 的网关和 DNS 是按适配器生效的，不区分来源 IP。多地址共用同一组网关和 DNS。</div>
+          </div>
+        </div>
+        <div class="dialog-foot">
+          <span class="validation-ok" style="margin-right:auto;display:flex;align-items:center;gap:5px;font-size:10.5px;color:#0f7b0f">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+            字段校验通过
+          </span>
+          <button class="btn" data-goto="static">测试</button>
+          <button class="btn primary" data-goto="main">保存</button>
+          <button class="btn" data-goto="main">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 应用确认 / 自动回滚 ================= -->
+    <div class="overlay overlay-apply">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="apply-title" style="width:620px">
+        <div class="dialog-head">
+          <div>
+            <div class="dialog-title" id="apply-title">应用预设</div>
+            <div class="dialog-sub">
+              <span>以太网</span><span>·</span><span>主路由-DHCP</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              <span>软路由-静态</span>
+            </div>
+          </div>
+          <button class="icon-btn" data-goto="main" title="关闭">
+            <svg width="14" height="14" viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10" stroke="currentColor" stroke-width="1.2"/></svg>
+          </button>
+        </div>
+        <div class="dialog-body">
+          <div class="diff-meta">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg>
+            将修改 4 项配置，其他字段保持不变
+          </div>
+          <div class="diff-wrap">
+            <table class="diff-table">
+              <thead>
+                <tr><th>字段</th><th>当前</th><th></th><th>应用后</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>IPv4</td>
+                  <td class="mono old">192.168.1.23/24</td>
+                  <td class="arrow">→</td>
+                  <td class="mono new">192.168.2.100/24</td>
+                </tr>
+                <tr>
+                  <td>默认网关</td>
+                  <td class="mono old">192.168.1.1</td>
+                  <td class="arrow">→</td>
+                  <td class="mono new">192.168.2.1</td>
+                </tr>
+                <tr>
+                  <td>DNS</td>
+                  <td class="old">自动</td>
+                  <td class="arrow">→</td>
+                  <td class="new">静态 · 192.168.2.1, 223.5.5.5</td>
+                </tr>
+                <tr>
+                  <td>接口跃点</td>
+                  <td class="old">自动</td>
+                  <td class="arrow">→</td>
+                  <td class="new">固定 · 10</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="notice red">
+            <svg class="notice-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+            <div>
+              <b>这是危险变更。</b>将修改默认网关和主 IPv4 地址，以太网又是当前唯一联网的适配器，应用后可能短暂断网。<br>
+              应用成功后开始 <b>60 秒</b>倒计时，期间不点击“保持”会自动恢复。
+            </div>
+          </div>
+        </div>
+        <div class="dialog-foot">
+          <span class="spacer"></span>
+          <button class="btn" data-goto="main">取消</button>
+          <button class="btn primary" data-goto="main">
+            应用并开始 60 秒倒计时
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 设置 ================= -->
+    <div class="overlay overlay-settings">
+      <div class="dialog settings" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="dialog-head">
+          <div>
+            <div class="dialog-title" id="settings-title">设置</div>
+            <div class="dialog-sub"><span>NetSwitch 0.1.0</span><span>·</span><span>管理员</span></div>
+          </div>
+          <button class="icon-btn" data-goto="main" title="关闭">
+            <svg width="14" height="14" viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10" stroke="currentColor" stroke-width="1.2"/></svg>
+          </button>
+        </div>
+        <div class="settings-body">
+          <nav class="settings-nav">
+            <div class="nav-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.42.66.78.85.24.13.5.2.78.2H21a2 2 0 1 1 0 4h-.09c-.28 0-.54.07-.78.2-.36.19-.64.49-.78.85z"/></svg>
+              常规
+            </div>
+            <div class="nav-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              安全与回滚
+            </div>
+            <div class="nav-item is-active">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              存储
+            </div>
+            <div class="nav-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v4H9zM4 7h16v14H4z"/><path d="M8 12h8M8 16h5"/></svg>
+              测试
+            </div>
+            <div class="nav-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg>
+              数据
+            </div>
+            <div class="nav-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+              关于
+            </div>
+          </nav>
+          <div class="settings-content">
+            <h2>存储</h2>
+            <p class="settings-intro">所有会保存到磁盘的文件都可以自定义位置。修改后会先校验目录，并可选择迁移现有数据。</p>
+
+            <div class="settings-section">
+              <h3>存储模式</h3>
+              <div class="segmented">
+                <button class="is-active">统一数据目录</button>
+                <button>分项自定义</button>
+              </div>
+              <div class="path-row">
+                <span class="path-label">数据目录</span>
+                <div class="path-value">D:\NetSwitchData</div>
+                <div class="path-actions">
+                  <button class="mini-btn">浏览…</button>
+                  <button class="mini-btn">打开</button>
+                </div>
+              </div>
+              <div class="settings-note">目录下的文件由应用统一管理；新增保存功能时会自动放在这里。</div>
+            </div>
+
+            <div class="settings-section">
+              <h3>实际路径</h3>
+              <div class="path-row">
+                <span class="path-label">配置文件</span>
+                <div class="path-value">D:\NetSwitchData\config.json<span class="derived">派生</span></div>
+                <div class="path-actions"><button class="mini-btn">打开</button></div>
+              </div>
+              <div class="path-row">
+                <span class="path-label">快照目录</span>
+                <div class="path-value">D:\NetSwitchData\snapshots<span class="derived">派生</span></div>
+                <div class="path-actions"><button class="mini-btn">打开</button></div>
+              </div>
+              <div class="path-row">
+                <span class="path-label">日志目录</span>
+                <div class="path-value">D:\NetSwitchData\logs<span class="derived">派生</span></div>
+                <div class="path-actions"><button class="mini-btn">打开</button></div>
+              </div>
+              <div class="path-row">
+                <span class="path-label">导出目录</span>
+                <div class="path-value">D:\NetSwitchData\exports<span class="derived">派生</span></div>
+                <div class="path-actions"><button class="mini-btn">打开</button></div>
+              </div>
+              <div class="path-row">
+                <span class="path-label">备份目录</span>
+                <div class="path-value">D:\NetSwitchData\backups<span class="derived">派生</span></div>
+                <div class="path-actions"><button class="mini-btn">打开</button></div>
+              </div>
+            </div>
+
+            <div class="notice">
+              <svg class="notice-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+              <div>如果路径位于移动硬盘或网络共享，启动时不可用会提示你“重试 / 选择新路径 / 使用默认路径进入只读模式”，不会静默新建空配置。网络路径建议使用 <span class="mono">\\server\share</span>。</div>
+            </div>
+          </div>
+        </div>
+        <div class="dialog-foot">
+          <div class="settings-foot">
+            <span class="path-status">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+              路径可写 · 剩余 186 GB
+            </span>
+          </div>
+          <button class="btn">恢复默认</button>
+          <button class="btn">迁移现有数据…</button>
+          <button class="btn" data-goto="main">取消</button>
+          <button class="btn primary" data-goto="main">保存</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="stage-caption">
+  <span>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+    设计示意，最终界面以 Avalonia 实现为准；数据为示例。
+  </span>
+  <span>切换上方标签查看不同流程 · <span class="kbd">Esc</span> 返回主窗口</span>
+</div>
+
+<script>
+  const app = document.getElementById('app');
+  const tabs = Array.from(document.querySelectorAll('.preview-tab'));
+
+  function setScreen(name, syncHash = true) {
+    if (!name) return;
+    app.dataset.screen = name;
+    tabs.forEach(tab => tab.classList.toggle('is-active', tab.dataset.screen === name));
+    if (syncHash && location.hash !== '#' + name) {
+      try { history.replaceState(null, '', '#' + name); }
+      catch (e) { location.hash = name; }
+    }
+  }
+
+  tabs.forEach(tab => tab.addEventListener('click', () => setScreen(tab.dataset.screen)));
+  document.querySelectorAll('[data-goto]').forEach(el => {
+    el.addEventListener('click', () => setScreen(el.dataset.goto));
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') setScreen('main');
+  });
+  window.addEventListener('hashchange', () => setScreen(location.hash.slice(1) || 'main', false));
+
+  const initial = location.hash.slice(1);
+  if (initial) setScreen(initial, false);
+</script>
+</body>
+</html>

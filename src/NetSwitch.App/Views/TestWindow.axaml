@@ -1,0 +1,174 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NetSwitch.App.ViewModels"
+        x:Class="NetSwitch.App.Views.TestWindow"
+        x:DataType="vm:TestWindowViewModel"
+        Title="测试预设"
+        Width="660"
+        Height="700"
+        CanResize="False"
+        ShowInTaskbar="False"
+        SystemDecorations="None"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent">
+  <Border Background="#FFFFFF"
+          BorderBrush="{DynamicResource BorderBrushSoft}"
+          BorderThickness="1"
+          CornerRadius="14"
+          BoxShadow="0 12 40 0 #26000000">
+    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
+      <!-- Header -->
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="22,18,14,0" PointerPressed="Header_OnPointerPressed">
+        <StackPanel Spacing="3">
+          <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Subtitle}" Classes="caption" FontSize="11" TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="icon" Command="{Binding CloseCommand}" VerticalAlignment="Top">
+          <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}" Width="12" Height="12" Stretch="Uniform" />
+        </Button>
+      </Grid>
+
+      <!-- Stage indicator -->
+      <Grid Grid.Row="1" ColumnDefinitions="Auto,44,Auto,*,Auto" Margin="22,16,22,0" VerticalAlignment="Center">
+        <Border Width="22" Height="22" CornerRadius="11"
+                Background="{Binding ShowTrial, Converter={StaticResource StepDoneBrush}}">
+          <TextBlock Text="1" FontSize="11" FontWeight="SemiBold" Foreground="White"
+                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Column="1" Height="2" Background="#E5E7EB" VerticalAlignment="Center" Margin="6,0" />
+        <Border Grid.Column="2" Width="22" Height="22" CornerRadius="11"
+                Background="{Binding ShowTrial, Converter={StaticResource StepActiveBrush}}">
+          <TextBlock Text="2" FontSize="11" FontWeight="SemiBold"
+                     Foreground="{Binding ShowTrial, Converter={StaticResource WhiteWhenTrue}}"
+                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+        <TextBlock Grid.Column="3" Text="{Binding StageText}" Classes="caption" FontSize="11" Margin="10,0,0,0" VerticalAlignment="Center" />
+      </Grid>
+
+      <!-- Body -->
+      <ScrollViewer Grid.Row="2" Margin="0,14,0,0" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="22,0,18,0" Spacing="10">
+          <!-- Summary banner -->
+          <Border Background="{Binding BannerTone, Converter={StaticResource ToneToBrush}, ConverterParameter=background}"
+                  BorderBrush="{Binding BannerTone, Converter={StaticResource ToneToBrush}, ConverterParameter=border}"
+                  BorderThickness="1"
+                  CornerRadius="9"
+                  Padding="12,10">
+            <Grid ColumnDefinitions="Auto,*">
+              <Path Data="{Binding BannerTone, Converter={StaticResource ToneToGeometry}}"
+                    Fill="{Binding BannerTone, Converter={StaticResource ToneToBrush}, ConverterParameter=foreground}"
+                    Width="17" Height="17" Stretch="Uniform" VerticalAlignment="Top" Margin="0,1,0,0" />
+              <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="2">
+                <TextBlock Text="{Binding BannerTitle}" FontSize="13" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding BannerMessage}" FontSize="12" LineHeight="18" Classes="muted" />
+              </StackPanel>
+            </Grid>
+          </Border>
+
+          <ProgressBar IsIndeterminate="True" Height="2" IsVisible="{Binding IsBusy}" Margin="0,2" />
+
+          <!-- Check list -->
+          <Border Background="#FFFFFF" BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1" CornerRadius="10">
+            <ItemsControl ItemsSource="{Binding Checks}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:CheckRowViewModel">
+                  <Border BorderBrush="#F0F1F3" BorderThickness="0,0,0,1" Padding="12,9">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                      <Path Data="{Binding Status, Converter={StaticResource TestStatusToGeometry}}"
+                            Fill="{Binding Status, Converter={StaticResource TestStatusToBrush}}"
+                            Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Top" Margin="0,1,0,0" />
+                      <StackPanel Grid.Column="1" Margin="10,0,12,0" Spacing="2">
+                        <TextBlock Text="{Binding Name}" FontSize="12.5" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Message}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" LineHeight="17" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="2" Spacing="2" HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding StatusText}"
+                                   FontSize="11"
+                                   FontWeight="Medium"
+                                   Foreground="{Binding Status, Converter={StaticResource TestStatusToBrush}}"
+                                   HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding LatencyText}" Classes="caption" FontSize="10.5"
+                                   HorizontalAlignment="Right" IsVisible="{Binding HasLatency}" />
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Border>
+
+          <!-- Trial restore note -->
+          <Border IsVisible="{Binding ShowTrial}" Padding="0,2">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Path Data="{StaticResource IconHistory}" Fill="{DynamicResource TextTertiaryBrush}" Width="13" Height="13" Stretch="Uniform" />
+                <TextBlock Text="{Binding RestoreText}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" />
+              </StackPanel>
+              <TextBlock Grid.Column="1" Text="{Binding DurationText}" Classes="caption" FontSize="11" VerticalAlignment="Center" />
+            </Grid>
+          </Border>
+
+        </StackPanel>
+      </ScrollViewer>
+
+      <StackPanel Grid.Row="3" Margin="22,10,22,0" Spacing="8">
+          <!-- Prompt before the trial -->
+          <Border IsVisible="{Binding ShowPrompt}"
+                  Background="{DynamicResource AmberSoftBrush}"
+                  BorderBrush="{DynamicResource AmberBorderBrush}"
+                  BorderThickness="1"
+                  CornerRadius="9"
+                  Padding="12,10">
+            <StackPanel Spacing="4">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Path Data="{StaticResource IconWarning}" Fill="{DynamicResource AmberBrush}" Width="14" Height="14" Stretch="Uniform" />
+                <TextBlock Text="是否继续做连通性测试？" FontSize="12.5" FontWeight="SemiBold" />
+              </StackPanel>
+              <TextBlock Text="{Binding PromptMessage}" FontSize="11.5" LineHeight="18" Classes="muted" Margin="20,0,0,0" />
+            </StackPanel>
+          </Border>
+
+          <Border IsVisible="{Binding ShowBlocking}"
+                  Background="{DynamicResource RedSoftBrush}"
+                  BorderBrush="{DynamicResource RedBorderBrush}"
+                  BorderThickness="1"
+                  CornerRadius="9"
+                  Padding="12,10"
+                  Margin="0,0,0,2">
+            <TextBlock Text="存在阻断性错误，无法继续连通性测试。请返回编辑器修正预设。"
+                       FontSize="11.5" Foreground="{DynamicResource RedBrush}" />
+          </Border>
+      </StackPanel>
+
+      <!-- Footer -->
+      <Border Grid.Row="4" BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="0,1,0,0" Margin="0,14,0,0" Padding="22,14">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Text="{Binding SummaryText}" Classes="caption" FontSize="11" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+            <Button Classes="secondary"
+                    Content="仅查看静态结果"
+                    Command="{Binding CloseCommand}"
+                    IsVisible="{Binding ShowStatic}" />
+            <Button Classes="primary"
+                    Command="{Binding ContinueTrialCommand}"
+                    IsVisible="{Binding ShowStatic}"
+                    IsEnabled="{Binding CanContinue}">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <TextBlock Text="继续连通性测试" FontSize="12" />
+                <Path Data="{StaticResource IconArrowRight}" Fill="White" Width="13" Height="13" Stretch="Uniform" />
+              </StackPanel>
+            </Button>
+            <Button Classes="secondary"
+                    Content="重新测试"
+                    Command="{Binding RestartCommand}"
+                    IsVisible="{Binding ShowTrial}" />
+            <Button Classes="primary"
+                    Content="关闭"
+                    Command="{Binding CloseCommand}"
+                    IsVisible="{Binding ShowTrial}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</Window>

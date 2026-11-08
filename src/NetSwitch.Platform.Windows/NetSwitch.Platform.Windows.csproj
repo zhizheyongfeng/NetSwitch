@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>NetSwitch.Platform.Windows</RootNamespace>
+    <AssemblyName>NetSwitch.Platform.Windows</AssemblyName>
+    <!-- Builds on any host; every entry point checks OperatingSystem.IsWindows() first. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- The whole assembly is Windows-only by design; the P/Invoke and WMI calls are all
+         behind OperatingSystem.IsWindows() guards at the public entry points. -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Windows-only at runtime, but the reference assembly restores and compiles on Linux. -->
+    <PackageReference Include="System.Management" Version="10.0.14" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NetSwitch.Core\NetSwitch.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="NetSwitch.Core.Tests" />
+  </ItemGroup>
+</Project>

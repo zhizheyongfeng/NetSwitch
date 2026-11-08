@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>NetSwitch.Platform.Fake</RootNamespace>
+    <AssemblyName>NetSwitch.Platform.Fake</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NetSwitch.Core\NetSwitch.Core.csproj" />
+  </ItemGroup>
+</Project>

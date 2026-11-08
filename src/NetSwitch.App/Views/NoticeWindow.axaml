@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetSwitch.App.Views.NoticeWindow"
+        Title="NetSwitch"
+        Width="340"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        SystemDecorations="None"
+        Topmost="True"
+        Background="Transparent">
+  <Border Background="#FFFFFF"
+          BorderBrush="{DynamicResource BorderBrushSoft}"
+          BorderThickness="1"
+          CornerRadius="12"
+          BoxShadow="0 10 30 0 #33000000"
+          Padding="14,12">
+    <Grid ColumnDefinitions="Auto,*">
+      <Border x:Name="IconBadge" Width="30" Height="30" CornerRadius="8"
+              Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Top">
+        <Path x:Name="IconPath" Data="{StaticResource IconInfo}" Fill="{DynamicResource AccentBrush}"
+              Width="15" Height="15" Stretch="Uniform" />
+      </Border>
+      <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="3">
+        <TextBlock x:Name="TitleText" Text="NetSwitch" FontSize="12" FontWeight="SemiBold" />
+        <TextBlock x:Name="MessageText" Text="" FontSize="11.5" LineHeight="17"
+                   TextWrapping="Wrap" Classes="muted" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

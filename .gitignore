@@ -1,0 +1,37 @@
+# 构建产物
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+publish/
+artifacts/
+TestResults/
+*.trx
+.DS_Store
+
+# 运行时数据（预设、日志、快照、备份、导出）不进入仓库
+locations.json
+config.json
+config.json.bak
+snapshots/
+logs/
+exports/
+backups/
+*.log
+
+# 本地私有配置与凭据
+.env
+.env.*
+*.pfx
+*.key
+*.pem
+
+# 开发过程文档（设计、规划、总结）不推送到公开仓库
+docs/*.md
+docs/**/*.md
+notes/
+plans/
